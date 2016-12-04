@@ -6,6 +6,8 @@ The most intuitive Windows® clipboard extension
   * .NET Framework 4.5 or higher
 
 # How to use
-Press 'Click to run', then 'Minimize to tray' and enjoy your extended clipboard!
-
+* To start press 'Click to run' and then 'Minimize to tray'.
+* To use extended clipboard press and hold CTRL+V combination
+  * Push and release 'V' button to select data
+  * To paste release 'CTRL' button
 
