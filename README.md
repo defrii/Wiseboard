@@ -8,6 +8,6 @@ The most intuitive Windows® clipboard extension
 # How to use
 * To start press 'Click to run' and then 'Minimize to tray'.
 * To use extended clipboard press and hold CTRL+V combination
-  * Push and release 'V' button to select data
+  * Release and push 'V' button to select data
   * To paste release 'CTRL' button
 
