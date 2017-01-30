@@ -105,7 +105,7 @@ namespace Wiseboard.Models
         {
             if (Clipboard.ContainsText())
             {
-                extendedClipboard.AddFirst(new ClipboardData(Clipboard.GetText()));
+                extendedClipboard.AddFirst(new ClipboardData(Clipboard.GetText(), false));
             }
 
             else if (Clipboard.ContainsFileDropList())
@@ -114,7 +114,7 @@ namespace Wiseboard.Models
                 foreach (var fileName in Clipboard.GetFileDropList())
                     fileNames += fileName + '\n';
 
-                extendedClipboard.AddFirst(new ClipboardData(Clipboard.GetDataObject(), fileNames));
+                extendedClipboard.AddFirst(new ClipboardData(Clipboard.GetDataObject(), true, fileNames));
             }
 
             while (extendedClipboard.Count > Settings.MaxSize)
@@ -174,7 +174,7 @@ namespace Wiseboard.Models
                 if (clipboardIndex >= 0)
                 {
                     currentElement = extendedClipboard.ElementAt(clipboardIndex);
-                    if (extendedClipboard.ElementAt(clipboardIndex).GetDataType() == Type.GetType("System.String"))
+                    if (!extendedClipboard.ElementAt(clipboardIndex).IsLinkOrLinks())
                         Clipboard.SetText((string)currentElement.GetData());
                     else
                         Clipboard.SetDataObject(currentElement.GetData());

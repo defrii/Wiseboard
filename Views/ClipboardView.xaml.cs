@@ -51,6 +51,11 @@ namespace Wiseboard.Views
                 block.Padding = new Thickness(10, 10, 10, 10);
                 block.TextAlignment = TextAlignment.Justify;
                 block.TextWrapping = TextWrapping.Wrap;
+                if (clip.IsLinkOrLinks())
+                {
+                    block.FontStyle = FontStyles.Italic;
+                    block.FontWeight = FontWeights.Bold;
+                }
 
                 block.Background = brush;
                 clipboardStack.Children.Add(block);

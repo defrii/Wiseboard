@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-D:\_Damianowe\Programming\C#\Wiseboard\Wiseboard\obj\Debug\
+D:\_Damianowe\Programming\C#\_Projects\Wiseboard\Wiseboard\obj\Debug\
 Wiseboard
 none
 false
 DEBUG;TRACE
-D:\_Damianowe\Programming\C#\Wiseboard\Wiseboard\App.xaml
+D:\_Damianowe\Programming\C#\_Projects\Wiseboard\Wiseboard\App.xaml
 4606737944
 
 17835203246
-70686512941
+70697705133
 MainWindow.xaml;Views\AboutView.xaml;Views\ClipboardView.xaml;Views\SettingsView.xaml;
 
 False
