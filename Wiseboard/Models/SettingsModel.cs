@@ -22,6 +22,7 @@ namespace Wiseboard.Models
             catch (Exception)
             {
                 MessageBox.Show("Cannot load config.xml");
+                UpdateConfiguration();
             }
         }
 
