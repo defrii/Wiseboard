@@ -1,9 +1,10 @@
 ﻿using Wiseboard.Models;
 using System;
+using System.Windows.Input;
 
 namespace Wiseboard.ViewModels
 {
-    class SettingsViewModel
+    public class SettingsViewModel
     {
         public SettingsModel SettingsModel { get; set; } = GlobalEventsHandler.Settings;
     }

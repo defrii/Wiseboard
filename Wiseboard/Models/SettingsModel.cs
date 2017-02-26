@@ -4,79 +4,116 @@ using System.ComponentModel;
 using System.Windows;
 using System.Linq;
 using System.Collections;
+using System.Xml.Linq;
 
 namespace Wiseboard.Models 
 {
     public class SettingsModel : INotifyPropertyChanged
     {
-        int maxSize = 5;
+        XElement _config;
+
+        public SettingsModel()
+        {
+            try
+            {
+                _config = XElement.Load("config.xml");
+                ReadFromXml();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Cannot load config.xml");
+            }
+        }
+
+        void ReadFromXml()
+        {
+            MaxSize = int.Parse(_config.Element("max_size").Value);
+            RectangleWidth = int.Parse(_config.Element("rectangle_width").Value);
+            Font = new FontFamily(_config.Element("font").Value);
+            FontSize = int.Parse(_config.Element("font_size").Value);
+            TimeToElapse = int.Parse(_config.Element("time_to_elapse").Value);
+        }
+
+        public void UpdateConfiguration()
+        {
+            _config = new XElement("configuration",
+                     new XElement("max_size", _maxSize),
+                     new XElement("rectangle_width", _rectangleWidth),
+                     new XElement("font", _font.ToString()),
+                     new XElement("font_size", _fontSize),
+                     new XElement("time_to_elapse", _timeToElapse)
+                );
+            _config.Save("config.xml");
+        }
+
+        int _maxSize = 5;
         public int MaxSize
         {
             get
             {
-                return maxSize;
+                return _maxSize;
             }
             set
             {
-                maxSize = value;
+                _maxSize = value;
                 OnPropertyChanged("MaxSize");
             }
         }
 
-        int rectangleWidth = 200;
+        int _rectangleWidth = 200;
         public int RectangleWidth
         {
             get
             {
-                return rectangleWidth;
+                return _rectangleWidth;
             }
             set
             {
-                rectangleWidth = value;
+                _rectangleWidth = value;
                 OnPropertyChanged("RectangleWidth");
             }
         }
 
         public IOrderedEnumerable<FontFamily> FontNames { get; set; } = Fonts.SystemFontFamilies.OrderBy(n => n.ToString());
 
-        FontFamily font = new FontFamily("Arial");
+        FontFamily _font = new FontFamily("Arial");
         public FontFamily Font
         {
             get
             {
-                return font;
+                return _font;
             }
             set
             {
-                font = value;
+                _font = value;
                 OnPropertyChanged("Font");
             }
         }
 
-        int fontSize = 12;
+        int _fontSize = 12;
         public int FontSize
         {
             get
             {
-                return fontSize;
+                return _fontSize;
             }
             set
             {
-                fontSize = value;
+                _fontSize = value;
                 OnPropertyChanged("FontSize");
             }
         }
 
-        int timeToElapse = 600;
+        int _timeToElapse = 600;
         public int TimeToElapse
         {
             get
             {
-                return timeToElapse;
+                return _timeToElapse;
             }
             set
             {
-                timeToElapse = value;
+                _timeToElapse = value;
                 OnPropertyChanged("TimeToElapse");
             }
         }
@@ -85,8 +122,7 @@ namespace Wiseboard.Models
 
         void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <max_size>5</max_size>
+  <rectangle_width>200</rectangle_width>
+  <font>Arial</font>
+  <font_size>12</font_size>
+  <time_to_elapse>600</time_to_elapse>
+</configuration>

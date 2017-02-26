@@ -16,27 +16,26 @@ namespace Wiseboard.Models
 
     public class ClipboardData : IClipboardData
     {
-        object data;
-        string fileNames;
-        readonly bool is_link;
+        readonly object _data;
+        readonly string _fileNames;
+        readonly bool _isLink;
 
-        public ClipboardData(object data, bool is_link_param, string file_names = null)
+        public ClipboardData(object data, bool isLinkParam, string fileNames = null)
         {
-            this.data = data;
-            fileNames = file_names;
-            is_link = is_link_param;
+            _data = data;
+            _fileNames = fileNames;
+            _isLink = isLinkParam;
         }
 
-        public Type GetDataType() => data.GetType();
-        public object GetData() => data;
+        public Type GetDataType() => _data.GetType();
+        public object GetData() => _data;
         public string GetVisibleText()
         {
-            if (!is_link)
+            if (!_isLink)
                 return (string)GetData();
-            else
-                return fileNames;
+            return _fileNames;
         }
 
-        public bool IsLinkOrLinks() => is_link;
+        public bool IsLinkOrLinks() => _isLink;
     }
 }

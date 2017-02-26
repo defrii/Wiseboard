@@ -24,8 +24,9 @@ namespace Wiseboard
     /// </summary>
     public partial class MainWindow : Window
     {
-        GlobalEventsHandler globalEventsHandler;
-        System.Windows.Forms.NotifyIcon notifyIcon;
+        GlobalEventsHandler _globalEventsHandler;
+        readonly System.Windows.Forms.NotifyIcon _notifyIcon;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -35,14 +36,16 @@ namespace Wiseboard
 
             var contextMenu = new System.Windows.Forms.ContextMenu();
             contextMenu.MenuItems.Add("Exit");
-            contextMenu.MenuItems[0].Click += (object sender, EventArgs e) => Close();
+            contextMenu.MenuItems[0].Click += (sender, e) => Close();
 
-            notifyIcon = new System.Windows.Forms.NotifyIcon();
-            notifyIcon.Icon = Properties.Resources.Icon;
-            notifyIcon.ContextMenu = contextMenu;
-            notifyIcon.Visible = true;
+            _notifyIcon = new System.Windows.Forms.NotifyIcon
+            {
+                Icon = Properties.Resources.Icon,
+                ContextMenu = contextMenu,
+                Visible = true
+            };
 
-            notifyIcon.Click += (object sender, EventArgs e) => DisplayFromMinimized();
+            _notifyIcon.Click += (sender, e) => DisplayFromMinimized();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -52,10 +55,10 @@ namespace Wiseboard
             PresentationSource source = PresentationSource.FromVisual(this);
 
             IntPtr wndHandler = new WindowInteropHelper(this).Handle;
-            globalEventsHandler = new GlobalEventsHandler(source, wndHandler);
+            _globalEventsHandler = new GlobalEventsHandler(source, wndHandler);
 
             HwndSource sourceHandler = (HwndSource)source;
-            sourceHandler.AddHook(globalEventsHandler.CaptureKeyCombinations);
+            sourceHandler?.AddHook(_globalEventsHandler.CaptureKeyCombinations);
         }
 
         void DisplayFromMinimized()
@@ -68,18 +71,14 @@ namespace Wiseboard
         {
             base.OnClosed(e);
 
-            globalEventsHandler.CloseClipboardView();
-            notifyIcon.Visible = false;
+            _globalEventsHandler.CloseClipboardView();
+            _globalEventsHandler.UnregisterAll();
+            _notifyIcon.Visible = false;
         }
 
         private void RunButton_Click(object sender, RoutedEventArgs e)
         {
-            if (globalEventsHandler.SwitchMode())
-            {
-                RunButton.Content = "Running...";
-            }
-            else
-                RunButton.Content = "Click to run";
+            RunButton.Content = _globalEventsHandler.SwitchMode() ? "Running..." : "Click to run";
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
