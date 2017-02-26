@@ -21,11 +21,11 @@ namespace Wiseboard.Views
     /// </summary>
     public partial class SettingsView : Window
     {
-        readonly SettingsViewModel _viewModel = new SettingsViewModel();
+        SettingsViewModel viewModel = new SettingsViewModel();
         public SettingsView()
         {
             InitializeComponent();
-            DataContext = _viewModel;
+            DataContext = viewModel;
         }
     }
 }

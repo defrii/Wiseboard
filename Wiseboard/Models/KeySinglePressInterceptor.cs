@@ -15,11 +15,11 @@ namespace Wiseboard.Models
         public delegate int KeyboardHookProc(int code, int wParam, ref KeyboardHookStruct lParam);
         public struct KeyboardHookStruct
         {
-            public int VkCode;
-            public int ScanCode;
-            public int Flags;
-            public int Time;
-            public int DwExtraInfo;
+            public int vkCode;
+            public int scanCode;
+            public int flags;
+            public int time;
+            public int dwExtraInfo;
         }
 
         const int WH_KEYBOARD_LL = 13;
@@ -29,65 +29,66 @@ namespace Wiseboard.Models
         const int WM_SYSKEYUP = 0x105;
 
         public List<Key> HookedKeys { get; set; } = new List<Key>();
-        readonly List<Key> _currentHandle = new List<Key>();
+        List<Key> CurrentHandle = new List<Key>();
 
         public event KeyEventHandler KeyDown;
         public event KeyEventHandler KeyUp;
 
-        IntPtr _hHook = IntPtr.Zero;
+        IntPtr hHook = IntPtr.Zero;
+        IntPtr hInstance = IntPtr.Zero;
 
-        private static KeyboardHookProc _callbackDelegate;
+        private static KeyboardHookProc callbackDelegate;
 
-        readonly PresentationSource _source;
+        PresentationSource Source;
 
         public KeySinglePressInterceptor(PresentationSource source)
         {
-            _source = source;
+            Source = source;
             Hook();
         }
 
         public void Hook()
         {
             IntPtr hInstance = LoadLibrary("User32");
-            _callbackDelegate = CaptureKeySinglePress;
-            _hHook = SetWindowsHookEx(WH_KEYBOARD_LL, _callbackDelegate, hInstance, 0);
-            if (_hHook == IntPtr.Zero) throw new Win32Exception();
+            callbackDelegate = new KeyboardHookProc(CaptureKeySinglePress);
+            hHook = SetWindowsHookEx(WH_KEYBOARD_LL, callbackDelegate, hInstance, 0);
+            if (hHook == IntPtr.Zero) throw new Win32Exception();
         }
 
         public void UnHook()
         {
-            if (_callbackDelegate == null) return;
-            bool ok = UnhookWindowsHookEx(_hHook);
+            if (callbackDelegate == null) return;
+            bool ok = UnhookWindowsHookEx(hHook);
             if (!ok) throw new Win32Exception();
-            _callbackDelegate = null;
+            callbackDelegate = null;
         }
 
         public int CaptureKeySinglePress(int code, int wParam, ref KeyboardHookStruct lParam)
         {
             if (code >= 0)
             {
-                Key key = KeyInterop.KeyFromVirtualKey(lParam.VkCode);
-                if (HookedKeys.Contains(key) && !_currentHandle.Contains(key))
+                Key key = KeyInterop.KeyFromVirtualKey(lParam.vkCode);
+                if (HookedKeys.Contains(key) && !CurrentHandle.Contains(key))
                 {
                     KeyEventArgs kea = new KeyEventArgs(Keyboard.PrimaryDevice,
-                                           _source, 0, key);
+                                           Source, 0, key);
                     if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && (KeyDown != null))
                     {
-                        _currentHandle.Add(key);
+                        CurrentHandle.Add(key);
                         KeyDown(this, kea);
                     }
                     else if ((wParam == WM_KEYUP || wParam == WM_SYSKEYUP) && (KeyUp != null))
                     {
-                        _currentHandle.Add(key);
+                        CurrentHandle.Add(key);
                         KeyUp(this, kea);
                     }
                     if (kea.Handled)
                         return 1;
 
-                    _currentHandle.Remove(key);
+                    CurrentHandle.Remove(key);
                 }
             }
-            return CallNextHookEx(_hHook, code, wParam, ref lParam);
+            return CallNextHookEx(hHook, code, wParam, ref lParam);
         }
 
         [DllImport("user32.dll")]

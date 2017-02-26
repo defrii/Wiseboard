@@ -19,18 +19,19 @@ namespace Wiseboard.Views
     /// </summary>
     public partial class ClipboardView : Window
     {
-        readonly LinearGradientBrush _brush;
-        readonly SettingsModel _settings;
-        readonly LinkedList<IClipboardData> _extendedClipboard;
+        LinearGradientBrush brush;
+        SettingsModel Settings;
+        LinkedList<IClipboardData> extendedClipboard;
 
         public ClipboardView(SettingsModel settings, LinkedList<IClipboardData> extendedClipboard)
         {
             InitializeComponent();
 
-            _settings = settings;
-            _extendedClipboard = extendedClipboard;
+            Settings = settings;
+            this.extendedClipboard = extendedClipboard;
 
-            _brush = new LinearGradientBrush(Color.FromRgb(80, 80, 80), Color.FromRgb(120, 120, 120), 0) {Opacity = 0.8};
+            brush = new LinearGradientBrush(Color.FromRgb(80, 80, 80), Color.FromRgb(120, 120, 120), 0);
+            brush.Opacity = 0.8;
 
             Show();
             Visibility = Visibility.Hidden;
@@ -39,28 +40,24 @@ namespace Wiseboard.Views
         public void DisplayClipboard()
         {
             clipboardStack.Children.Clear();
-            foreach (var clip in _extendedClipboard)
+            foreach (var clip in extendedClipboard)
             {
-                TextBlock block = new TextBlock
-                {
-                    Text = clip.GetVisibleText(),
-                    Width = _settings.RectangleWidth,
-                    Height = _settings.RectangleWidth,
-                    FontFamily = _settings.Font,
-                    FontSize = _settings.FontSize,
-                    Foreground = Brushes.Bisque,
-                    Padding = new Thickness(10, 10, 10, 10),
-                    TextAlignment = TextAlignment.Justify,
-                    TextWrapping = TextWrapping.Wrap
-                };
-
+                TextBlock block = new TextBlock() { Text = clip.GetVisibleText() };
+                block.Width = Settings.RectangleWidth;
+                block.Height = Settings.RectangleWidth;
+                block.FontFamily = Settings.Font;
+                block.FontSize = Settings.FontSize;
+                block.Foreground = Brushes.Bisque;
+                block.Padding = new Thickness(10, 10, 10, 10);
+                block.TextAlignment = TextAlignment.Justify;
+                block.TextWrapping = TextWrapping.Wrap;
                 if (clip.IsLinkOrLinks())
                 {
                     block.FontStyle = FontStyles.Italic;
                     block.FontWeight = FontWeights.Bold;
                 }
 
-                block.Background = _brush;
+                block.Background = brush;
                 clipboardStack.Children.Add(block);
             }
 
@@ -80,7 +77,7 @@ namespace Wiseboard.Views
         {
             var elements = clipboardStack.Children.OfType<TextBlock>().ToArray();
             foreach (var element in elements)
-                element.Background = _brush;
+                element.Background = brush;
         }
 
         void CenterWindow()

@@ -9,74 +9,74 @@ namespace Wiseboard.Models
 {
     public class SettingsModel : INotifyPropertyChanged
     {
-        int _maxSize = 5;
+        int maxSize = 5;
         public int MaxSize
         {
             get
             {
-                return _maxSize;
+                return maxSize;
             }
             set
             {
-                _maxSize = value;
+                maxSize = value;
                 OnPropertyChanged("MaxSize");
             }
         }
 
-        int _rectangleWidth = 200;
+        int rectangleWidth = 200;
         public int RectangleWidth
         {
             get
             {
-                return _rectangleWidth;
+                return rectangleWidth;
             }
             set
             {
-                _rectangleWidth = value;
+                rectangleWidth = value;
                 OnPropertyChanged("RectangleWidth");
             }
         }
 
         public IOrderedEnumerable<FontFamily> FontNames { get; set; } = Fonts.SystemFontFamilies.OrderBy(n => n.ToString());
 
-        FontFamily _font = new FontFamily("Arial");
+        FontFamily font = new FontFamily("Arial");
         public FontFamily Font
         {
             get
             {
-                return _font;
+                return font;
             }
             set
             {
-                _font = value;
+                font = value;
                 OnPropertyChanged("Font");
             }
         }
 
-        int _fontSize = 12;
+        int fontSize = 12;
         public int FontSize
         {
             get
             {
-                return _fontSize;
+                return fontSize;
             }
             set
             {
-                _fontSize = value;
+                fontSize = value;
                 OnPropertyChanged("FontSize");
             }
         }
 
-        int _timeToElapse = 600;
+        int timeToElapse = 600;
         public int TimeToElapse
         {
             get
             {
-                return _timeToElapse;
+                return timeToElapse;
             }
             set
             {
-                _timeToElapse = value;
+                timeToElapse = value;
                 OnPropertyChanged("TimeToElapse");
             }
         }
@@ -85,7 +85,8 @@ namespace Wiseboard.Models
 
         void OnPropertyChanged(string propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (PropertyChanged != null)
+                PropertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
     }
 }
