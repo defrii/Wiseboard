@@ -1,6 +1,4 @@
-﻿using Wiseboard.Models;
-using Wiseboard.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -16,6 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Wiseboard.Handlers;
+using Wiseboard.Views;
 
 namespace Wiseboard
 {
@@ -24,7 +24,7 @@ namespace Wiseboard
     /// </summary>
     public partial class MainWindow : Window
     {
-        GlobalEventsHandler _globalEventsHandler;
+        PastingHandler _pastingHandler;
         readonly System.Windows.Forms.NotifyIcon _notifyIcon;
 
         public MainWindow()
@@ -55,10 +55,10 @@ namespace Wiseboard
             PresentationSource source = PresentationSource.FromVisual(this);
 
             IntPtr wndHandler = new WindowInteropHelper(this).Handle;
-            _globalEventsHandler = new GlobalEventsHandler(source, wndHandler);
+            _pastingHandler = new PastingHandler(source, wndHandler);
 
             HwndSource sourceHandler = (HwndSource)source;
-            sourceHandler?.AddHook(_globalEventsHandler.CaptureKeyCombinations);
+            sourceHandler?.AddHook(_pastingHandler.CaptureKeyCombinations);
         }
 
         void DisplayFromMinimized()
@@ -71,14 +71,14 @@ namespace Wiseboard
         {
             base.OnClosed(e);
 
-            _globalEventsHandler.CloseClipboardView();
-            _globalEventsHandler.UnregisterAll();
+            _pastingHandler.CloseClipboardView();
+            _pastingHandler.UnregisterAll();
             _notifyIcon.Visible = false;
         }
 
         private void RunButton_Click(object sender, RoutedEventArgs e)
         {
-            RunButton.Content = _globalEventsHandler.SwitchMode() ? "Running..." : "Click to run";
+            RunButton.Content = _pastingHandler.SwitchMode() ? "Running..." : "Click to run";
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)

@@ -39,6 +39,8 @@ namespace Wiseboard.Views
         public void DisplayClipboard()
         {
             clipboardStack.Children.Clear();
+            if (_extendedClipboard.Count == 0) return;
+
             foreach (var clip in _extendedClipboard)
             {
                 TextBlock block = new TextBlock
@@ -63,7 +65,7 @@ namespace Wiseboard.Views
                 block.Background = _brush;
                 clipboardStack.Children.Add(block);
             }
-
+            SetNextElement(0);
             CenterWindow();
             Visibility = Visibility.Visible;
         }
