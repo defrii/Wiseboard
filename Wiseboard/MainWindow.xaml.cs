@@ -35,8 +35,6 @@ namespace Wiseboard
             };
 
             _notifyIcon.Click += (sender, e) => DisplayFromMinimized();
-
-            Visibility = Visibility.Hidden;
         }
 
         protected override void OnSourceInitialized(EventArgs e)
