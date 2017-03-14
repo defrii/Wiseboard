@@ -11,6 +11,7 @@ using WindowsInput;
 using WindowsInput.Native;
 using Wiseboard.Handlers.Helpers;
 using Wiseboard.Models;
+using Wiseboard.Observers;
 using Wiseboard.Views;
 
 namespace Wiseboard.Handlers
@@ -29,6 +30,9 @@ namespace Wiseboard.Handlers
 
         enum HotKeyId { Paste };
 
+        Key _shortcutKey;
+        int _shortcutModifier;
+
         const int WH_KEYBOARD_LL = 13;
         const int WM_HOTKEY = 0x0312;
         const int WM_CLIPBOARDUPDATE = 0x031D;
@@ -37,11 +41,12 @@ namespace Wiseboard.Handlers
 
         public ClipboardView ClipboardDisplayer { get; set; }
         public LinkedList<IClipboardData> ExtendedClipboard { get; set; } = new LinkedList<IClipboardData>();
+        private readonly List<IChangedStatusObserver> _changedStatusObservers = new List<IChangedStatusObserver>();
 
         public static SettingsModel Settings { get; set; } = new SettingsModel();
-        ClipboardEventsHandler clipboardEventsHandler = new ClipboardEventsHandler();
+        readonly ClipboardEventsHandler _clipboardEventsHandler = new ClipboardEventsHandler();
 
-        bool _isRunning;
+        public bool Running { get; set; } = true;
         int _clipboardIndex;
 
         readonly InputSimulator _inputSimulator = new InputSimulator();
@@ -59,7 +64,13 @@ namespace Wiseboard.Handlers
         {
             _source = source;
             _wndHandler = wndHandler;
-            ClipboardDisplayer = new ClipboardView(Settings, ExtendedClipboard);
+            ClipboardDisplayer = new ClipboardView(Settings.AppearanceSettingsModel, ExtendedClipboard);
+
+            if (Running)
+            {
+                AddClipboardFormatListener(_wndHandler);
+                RegisterHotKey(_wndHandler, (int)HotKeyId.Paste, CONTROL, VK_V);
+            }
 
             _hookedKeys.Add(Key.V);
             _hookedKeys.Add(Key.LeftCtrl);
@@ -75,21 +86,16 @@ namespace Wiseboard.Handlers
             {
                 Key key = KeyInterop.KeyFromVirtualKey(lParam.VkCode);
 
-                if (clipboardEventsHandler.IsPastedBeforeDisplayClipboard())
+                if (_clipboardEventsHandler.IsPastedBeforeDisplayClipboard())
                 {
                     if (HandleEarlyPastedKeyPressed(key, wParam))
                         return 1;
                 }
-
-                if (_hookedKeys.Contains(key))
-                {
-                    KeyEventArgs kea = new KeyEventArgs(Keyboard.PrimaryDevice,
-                                           _source, 0, key);
-                    if (TypeOfPressChecker.IsKeyDownPressed(wParam))
-                        KeyDownKeyHandle(this, kea);
-                    else if (TypeOfPressChecker.IsKeyUpPressed(wParam))
-                        KeyUpKeyHandle(this, kea);
-                }
+                KeyEventArgs kea = new KeyEventArgs(Keyboard.PrimaryDevice, _source, 0, key);
+                if (TypeOfPressChecker.IsKeyDownPressed(wParam))
+                    KeyDownKeyHandle(kea);
+                else if (TypeOfPressChecker.IsKeyUpPressed(wParam))
+                    KeyUpKeyHandle(kea);
             }
             return CallNextHookEx(_hHook, code, wParam, ref lParam);
         }
@@ -101,19 +107,20 @@ namespace Wiseboard.Handlers
                 PasteStart();
             }
             else if (_hookedKeys.Contains(key) && TypeOfPressChecker.IsKeyUpPressed(typeOfPress)
-                && IsPastingStarted() && !clipboardEventsHandler.IsItemSelectingFromClipboard())
+                && IsPastingStarted() && !_clipboardEventsHandler.IsItemSelectingFromClipboard())
             {
                 PasteStop();
             }
-            else if (key == Key.V && TypeOfPressChecker.IsKeyDownPressed(typeOfPress) && clipboardEventsHandler.IsItemSelectingFromClipboard()
-                && !clipboardEventsHandler.CanChangePositionOfSelectedItem())
+            else if (key == Key.V && TypeOfPressChecker.IsKeyDownPressed(typeOfPress)
+                && _clipboardEventsHandler.IsItemSelectingFromClipboard()
+                && !_clipboardEventsHandler.CanChangePositionOfSelectedItem())
             {
                 SetNextElement();
-                clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
+                _clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
             }
             else if (key == Key.V && TypeOfPressChecker.IsKeyUpPressed(typeOfPress))
             {
-                clipboardEventsHandler.SetChangePositionOfSelectedItem(false);
+                _clipboardEventsHandler.SetChangePositionOfSelectedItem(false);
             }
             if (key == Key.V)
                 return true;
@@ -139,31 +146,31 @@ namespace Wiseboard.Handlers
 
         public void SetNextElement()
         {
-            if (ExtendedClipboard.Count > 0 && !clipboardEventsHandler.CanChangePositionOfSelectedItem()
-                && _timer.ElapsedMilliseconds >= Settings.TimeToElapse)
+            if (ExtendedClipboard.Count > 0 && !_clipboardEventsHandler.CanChangePositionOfSelectedItem()
+                && _timer.ElapsedMilliseconds >= Settings.GeneralSettingsModel.TimeToElapse)
             {
                 if (++_clipboardIndex >= ExtendedClipboard.Count)
                     _clipboardIndex = 0;
 
                 ClipboardDisplayer.SetNextElement(_clipboardIndex);
 
-                clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
+                _clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
             }
         }
 
         public void PasteStart()
         {
-            if (!_timer.IsRunning)
+            if (!IsPastingStarted())
             {
                 _timer.Start();
-                clipboardEventsHandler.SetChangePositionOfSelectedItem(false);
+                _clipboardEventsHandler.SetChangePositionOfSelectedItem(false);
                 WaitForDisplayExtendedClipboard();
             }
         }
 
         public void PasteStop()
         {
-            if (!_timer.IsRunning || ExtendedClipboard.Count == 0) return;
+            if (!IsPastingStarted() || ExtendedClipboard.Count == 0) return;
             _timer.Reset();
 
             UnregisterAll();
@@ -194,29 +201,28 @@ namespace Wiseboard.Handlers
             _clipboardIndex = 0;
         }
 
-        void KeyUpKeyHandle(object sender, KeyEventArgs e)
+        void KeyUpKeyHandle(KeyEventArgs e)
         {
             Key key = e.Key;
             switch (key)
             {
                 case Key.V:
-                    if (_timer.ElapsedMilliseconds < Settings.TimeToElapse && _timer.IsRunning)
+                    if (_timer.ElapsedMilliseconds < Settings.GeneralSettingsModel.TimeToElapse && IsPastingStarted())
                     {
-                        clipboardEventsHandler.SetPastedBeforeDisplayClipboard(true);
-                        clipboardEventsHandler.SetSelectingFromClipboard(false);
+                        _clipboardEventsHandler.SetPastedBeforeDisplayClipboard(true);
+                        _clipboardEventsHandler.SetSelectingFromClipboard(false);
                         PasteStop();
                     }
                     else
                     {
-                        clipboardEventsHandler.SetChangePositionOfSelectedItem(false);
-                        clipboardEventsHandler.SetPastedBeforeDisplayClipboard(false);
+                        _clipboardEventsHandler.SetChangePositionOfSelectedItem(false);
+                        _clipboardEventsHandler.SetPastedBeforeDisplayClipboard(false);
                     }
-
                     break;
                 case Key.LeftCtrl:
                 case Key.RightCtrl:
-                    clipboardEventsHandler.SetPastedBeforeDisplayClipboard(false);
-                    if (_timer.IsRunning)
+                    _clipboardEventsHandler.SetPastedBeforeDisplayClipboard(false);
+                    if (IsPastingStarted())
                     {
                         PasteStop();
                     }
@@ -224,43 +230,47 @@ namespace Wiseboard.Handlers
             }
         }
 
-        void KeyDownKeyHandle(object sender, KeyEventArgs e)
+        void KeyDownKeyHandle(KeyEventArgs e)
         {
             Key key = e.Key;
+
             switch (key)
             {
                 case Key.V:
-                    if (!clipboardEventsHandler.CanChangePositionOfSelectedItem() && _timer.IsRunning)
+                    if (!_clipboardEventsHandler.CanChangePositionOfSelectedItem() && IsPastingStarted())
                     {
                         SetNextElement();
-                        clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
+                        _clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
                     }
-                    else if (_timer.IsRunning)
+                    else if (IsPastingStarted())
                     {
                         PasteStart();
                     }
                     break;
             }
-        }
 
-        public bool IsPastingStarted()
-        {
-            return _timer.IsRunning;
+            if (e.Key == Settings.GeneralSettingsModel.ShortcutKey
+                && Keyboard.Modifiers == (ModifierKeys) Settings.GeneralSettingsModel.ShortcutModifiers)
+            {
+                bool status = SwitchMode();
+                foreach (var observer in _changedStatusObservers)
+                    observer.UpdateStatus(status);
+            }
         }
 
         public bool SwitchMode()
         {
-            if (!_isRunning)
+            if (!Running)
             {
                 AddClipboardFormatListener(_wndHandler);
                 RegisterHotKey(_wndHandler, (int)HotKeyId.Paste, CONTROL, VK_V);
-                _isRunning = true;
+                Running = true;
                 return true;
             }
 
             RemoveClipboardFormatListener(_wndHandler);
             UnregisterHotKey(_wndHandler, (int)HotKeyId.Paste);
-            _isRunning = false;
+            Running = false;
             return false;
         }
 
@@ -281,7 +291,7 @@ namespace Wiseboard.Handlers
                 ExtendedClipboard.AddFirst(new ClipboardData(Clipboard.GetDataObject(), true, fileNames));
             }
 
-            while (ExtendedClipboard.Count > Settings.MaxSize)
+            while (ExtendedClipboard.Count > Settings.GeneralSettingsModel.MaxSize)
                 ExtendedClipboard.RemoveLast();
         }
 
@@ -296,17 +306,17 @@ namespace Wiseboard.Handlers
             {
                 lock (_timer)
                 {
-                    while (_timer.ElapsedMilliseconds < Settings.TimeToElapse) ;
+                    while (_timer.ElapsedMilliseconds < Settings.GeneralSettingsModel.TimeToElapse) ;
                 }
             });
 
-            if (_timer.IsRunning)
-            {
-                clipboardEventsHandler.SetSelectingFromClipboard(true);
-                clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
-                ClipboardDisplayer.DisplayClipboard();
-            }
+            if (!IsPastingStarted()) return;
+            _clipboardEventsHandler.SetSelectingFromClipboard(true);
+            _clipboardEventsHandler.SetChangePositionOfSelectedItem(true);
+            ClipboardDisplayer.DisplayClipboard();
         }
+
+        public void AddObserver(IChangedStatusObserver observer) => _changedStatusObservers.Add(observer);
 
         public void Hook()
         {
@@ -336,6 +346,11 @@ namespace Wiseboard.Handlers
             RemoveClipboardFormatListener(_wndHandler);
             UnregisterHotKey(_wndHandler, (int)HotKeyId.Paste);
             UnHook();
+        }
+
+        public bool IsPastingStarted()
+        {
+            return _timer.IsRunning;
         }
 
         [DllImport("user32.dll")]

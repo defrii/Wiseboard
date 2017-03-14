@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Wiseboard.Handlers;
+using Wiseboard.Observers;
 using Wiseboard.Views;
 
 namespace Wiseboard
@@ -22,7 +11,7 @@ namespace Wiseboard
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IChangedStatusObserver
     {
         PastingHandler _pastingHandler;
         readonly System.Windows.Forms.NotifyIcon _notifyIcon;
@@ -32,7 +21,7 @@ namespace Wiseboard
             InitializeComponent();
 
             Icon = Imaging.CreateBitmapSourceFromHIcon(Properties.Resources.Icon.Handle, Int32Rect.Empty,
-                   BitmapSizeOptions.FromEmptyOptions());
+                BitmapSizeOptions.FromEmptyOptions());
 
             var contextMenu = new System.Windows.Forms.ContextMenu();
             contextMenu.MenuItems.Add("Exit");
@@ -46,6 +35,8 @@ namespace Wiseboard
             };
 
             _notifyIcon.Click += (sender, e) => DisplayFromMinimized();
+
+            Visibility = Visibility.Hidden;
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -56,9 +47,12 @@ namespace Wiseboard
 
             IntPtr wndHandler = new WindowInteropHelper(this).Handle;
             _pastingHandler = new PastingHandler(source, wndHandler);
+            _pastingHandler.AddObserver(this);
 
-            HwndSource sourceHandler = (HwndSource)source;
+            HwndSource sourceHandler = (HwndSource) source;
             sourceHandler?.AddHook(_pastingHandler.CaptureKeyCombinations);
+
+            VerifyRunButtonContent();
         }
 
         void DisplayFromMinimized()
@@ -96,6 +90,16 @@ namespace Wiseboard
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             Visibility = Visibility.Hidden;
+        }
+
+        private void VerifyRunButtonContent()
+        {
+            RunButton.Content = _pastingHandler.Running ? "Running..." : "Click to run";
+        }
+
+        public void UpdateStatus(bool status)
+        {
+            RunButton.Content = status ? "Running..." : "Click to run";
         }
     }
 }

@@ -27,7 +27,7 @@
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
-        <Button x:Name="RunButton" Click="RunButton_Click" Content="Click to run" Background="#FF5000"/>
+        <Button x:Name="RunButton" Click="RunButton_Click" Content="Click to start" Background="#FF5000"/>
         <Button x:Name="SettingsButton" Grid.Column="1" Click="SettingsButton_Click" Content="Settings" Background="#4461FF"/>
         <Button x:Name="AboutButton" Grid.Row="1" Click="AboutButton_Click" Content="About" Background="#B8007D"/>
         <Button x:Name="MinimizeButton" Grid.Row="1" Grid.Column="1" Click="ExitButton_Click" Content="Minimize to tray" Background="#5B00C9"/> 

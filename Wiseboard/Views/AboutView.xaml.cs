@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
+﻿using System.Windows;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace Wiseboard.Views
 {
@@ -26,6 +15,14 @@ namespace Wiseboard.Views
 
             Logo.Source = Imaging.CreateBitmapSourceFromHIcon(Properties.Resources.Icon.Handle, Int32Rect.Empty,
                           BitmapSizeOptions.FromEmptyOptions());
+        }
+
+        public new void Show()
+        {
+            var screen = System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
+            Left = screen.Bounds.Left;
+            Top = screen.Bounds.Top;
+            base.Show();
         }
     }
 }

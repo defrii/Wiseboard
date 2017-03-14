@@ -83,6 +83,10 @@
     <Compile Include="Models\ClipboardData.cs" />
     <Compile Include="Handlers\PastingHandler.cs" />
     <Compile Include="Models\SettingsModel.cs" />
+    <Compile Include="Models\Settings\AppearanceSettingsModel.cs" />
+    <Compile Include="Models\Settings\GeneralSettingsModel.cs" />
+    <Compile Include="Observers\IChangedStatusObserver.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="Views\AboutView.xaml.cs">
       <DependentUpon>AboutView.xaml</DependentUpon>

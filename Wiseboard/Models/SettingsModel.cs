@@ -1,22 +1,25 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows.Media;
-using System.ComponentModel;
 using System.Windows;
-using System.Linq;
-using System.Collections;
+using System.Windows.Input;
 using System.Xml.Linq;
+using Wiseboard.Models.Settings;
 
 namespace Wiseboard.Models 
 {
-    public class SettingsModel : INotifyPropertyChanged
+    public class SettingsModel
     {
+        public GeneralSettingsModel GeneralSettingsModel { get; set; } = new GeneralSettingsModel();
+        public AppearanceSettingsModel AppearanceSettingsModel { get; set; } = new AppearanceSettingsModel();
+
         XElement _config;
 
         public SettingsModel()
         {
             try
             {
-                _config = XElement.Load("config.xml");
+                _config = XElement.Load(AppDomain.CurrentDomain.BaseDirectory + "\\config.xml");
                 ReadFromXml();
             }
             catch (Exception)
@@ -28,102 +31,69 @@ namespace Wiseboard.Models
 
         void ReadFromXml()
         {
-            MaxSize = int.Parse(_config.Element("max_size").Value);
-            RectangleWidth = int.Parse(_config.Element("rectangle_width").Value);
-            Font = new FontFamily(_config.Element("font").Value);
-            FontSize = int.Parse(_config.Element("font_size").Value);
-            TimeToElapse = int.Parse(_config.Element("time_to_elapse").Value);
+            ReadGeneralSettings();
+            ReadAppearanceSettings();
+        }
+
+        void ReadGeneralSettings()
+        {
+            XElement general = _config.Element("general");
+            GeneralSettingsModel.MaxSize = int.Parse(general.Element("max_size").Value);
+            GeneralSettingsModel.TimeToElapse = int.Parse(general.Element("time_to_elapse").Value);
+            GeneralSettingsModel.IsAutostart = bool.Parse(general.Element("is_autostart").Value);
+            GeneralSettingsModel.IsShortcutActivated = bool.Parse(general.Element("is_shortcut_activated").Value);
+
+            XElement shortcut = general.Element("shortcut");
+            GeneralSettingsModel.ShortcutKey = (Key)int.Parse(shortcut.Element("key").Value);
+            GeneralSettingsModel.ShortcutModifiers = int.Parse(shortcut.Element("modifiers").Value);
+            GeneralSettingsModel.Combination = ConvertCombinationToString();
+        }
+
+        void ReadAppearanceSettings()
+        {
+            XElement appearance = _config.Element("appearance");
+            AppearanceSettingsModel.RectangleSize = int.Parse(appearance.Element("rectangle_size").Value);
+            AppearanceSettingsModel.Font = new FontFamily(appearance.Element("font").Value);
+            AppearanceSettingsModel.FontSize = int.Parse(appearance.Element("font_size").Value);
         }
 
         public void UpdateConfiguration()
         {
+            SaveConfigToFile();
+        }
+
+        void SaveConfigToFile()
+        {
             _config = new XElement("configuration",
-                     new XElement("max_size", _maxSize),
-                     new XElement("rectangle_width", _rectangleWidth),
-                     new XElement("font", _font.ToString()),
-                     new XElement("font_size", _fontSize),
-                     new XElement("time_to_elapse", _timeToElapse)
-                );
-            _config.Save("config.xml");
+            new XElement("general",
+                new XElement("max_size", GeneralSettingsModel.MaxSize),
+                new XElement("time_to_elapse", GeneralSettingsModel.TimeToElapse),
+                new XElement("is_autostart", GeneralSettingsModel.IsAutostart),
+                new XElement("is_shortcut_activated", GeneralSettingsModel.IsShortcutActivated),
+                new XElement("shortcut",
+                    new XElement("key", (int)GeneralSettingsModel.ShortcutKey),
+                    new XElement("modifiers", GeneralSettingsModel.ShortcutModifiers)
+                )),
+            new XElement("appearance",
+                new XElement("rectangle_size", AppearanceSettingsModel.RectangleSize),
+                new XElement("font", AppearanceSettingsModel.Font),
+                new XElement("font_size", AppearanceSettingsModel.FontSize))
+            );
+            _config.Save(AppDomain.CurrentDomain.BaseDirectory + "\\config.xml");
         }
 
-        int _maxSize = 5;
-        public int MaxSize
+        string ConvertCombinationToString()
         {
-            get
+            string combination = "";
+            int modifiers = GeneralSettingsModel.ShortcutModifiers;
+            for (int i = 1; i <= 8; i*=2)
             {
-                return _maxSize;
+                int tp = modifiers & i;
+                if (tp != 0)
+                    combination += (ModifierKeys)i + "+";
             }
-            set
-            {
-                _maxSize = value;
-                OnPropertyChanged("MaxSize");
-            }
-        }
-
-        int _rectangleWidth = 200;
-        public int RectangleWidth
-        {
-            get
-            {
-                return _rectangleWidth;
-            }
-            set
-            {
-                _rectangleWidth = value;
-                OnPropertyChanged("RectangleWidth");
-            }
-        }
-
-        public IOrderedEnumerable<FontFamily> FontNames { get; set; } = Fonts.SystemFontFamilies.OrderBy(n => n.ToString());
-
-        FontFamily _font = new FontFamily("Arial");
-        public FontFamily Font
-        {
-            get
-            {
-                return _font;
-            }
-            set
-            {
-                _font = value;
-                OnPropertyChanged("Font");
-            }
-        }
-
-        int _fontSize = 12;
-        public int FontSize
-        {
-            get
-            {
-                return _fontSize;
-            }
-            set
-            {
-                _fontSize = value;
-                OnPropertyChanged("FontSize");
-            }
-        }
-
-        int _timeToElapse = 600;
-        public int TimeToElapse
-        {
-            get
-            {
-                return _timeToElapse;
-            }
-            set
-            {
-                _timeToElapse = value;
-                OnPropertyChanged("TimeToElapse");
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            combination += GeneralSettingsModel.ShortcutKey;
+            return combination;
         }
     }
 }

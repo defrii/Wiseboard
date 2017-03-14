@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Wiseboard.Models;
+using Wiseboard.Models.Settings;
+
 namespace Wiseboard.Views
 {
     /// <summary>
@@ -20,10 +14,10 @@ namespace Wiseboard.Views
     public partial class ClipboardView : Window
     {
         readonly LinearGradientBrush _brush;
-        readonly SettingsModel _settings;
+        readonly AppearanceSettingsModel _settings;
         readonly LinkedList<IClipboardData> _extendedClipboard;
 
-        public ClipboardView(SettingsModel settings, LinkedList<IClipboardData> extendedClipboard)
+        public ClipboardView(AppearanceSettingsModel settings, LinkedList<IClipboardData> extendedClipboard)
         {
             InitializeComponent();
 
@@ -46,8 +40,8 @@ namespace Wiseboard.Views
                 TextBlock block = new TextBlock
                 {
                     Text = clip.GetVisibleText(),
-                    Width = _settings.RectangleWidth,
-                    Height = _settings.RectangleWidth,
+                    Width = _settings.RectangleSize,
+                    Height = _settings.RectangleSize,
                     FontFamily = _settings.Font,
                     FontSize = _settings.FontSize,
                     Foreground = Brushes.Bisque,
@@ -67,6 +61,7 @@ namespace Wiseboard.Views
             }
             SetNextElement(0);
             CenterWindow();
+
             Visibility = Visibility.Visible;
         }
 
@@ -90,11 +85,11 @@ namespace Wiseboard.Views
             int count = clipboardStack.Children.OfType<TextBlock>().Count();
             if (count > 0)
             {
-                double systemWidth = SystemParameters.PrimaryScreenWidth;
-                double systemHeight = SystemParameters.PrimaryScreenHeight;
-
-                Left = systemWidth / 2 - (clipboardStack.Children.OfType<TextBlock>().First().Width * count) / 2;
-                Top = systemHeight / 2 - clipboardStack.Children.OfType<TextBlock>().First().Height / 2;
+                var screen = System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
+                Left = screen.WorkingArea.Left + screen.WorkingArea.Width/2 - 
+                    (clipboardStack.Children.OfType<TextBlock>().First().Width * count) / 2;
+                Top = screen.WorkingArea.Top + screen.WorkingArea.Height/2 - 
+                    clipboardStack.Children.OfType<TextBlock>().First().Height / 2;
             }
         }
         

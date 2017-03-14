@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-
-namespace Wiseboard.Handlers.Helpers
+﻿namespace Wiseboard.Handlers.Helpers
 {
     public static class TypeOfPressChecker
     {

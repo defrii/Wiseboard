@@ -26,28 +26,75 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </Window.Resources>
-    <Grid DataContext="{Binding SettingsModel}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
-        </Grid.ColumnDefinitions>
+    <TabControl>
+        <TabItem Header="General">
+            <Grid DataContext="{Binding SettingsModel.GeneralSettingsModel}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
 
-        <Grid.RowDefinitions>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-        </Grid.RowDefinitions>
-        <Label x:Name="MaxSizeLabel" Content="Maximum size"/>
-        <Label x:Name="RectangleWidthLabel" Content="Rectangle width" Grid.Row="1"/>
-        <Label x:Name="FontLabel" Content="Font" Grid.Row="2"/>
-        <Label x:Name="FontSizeLabel" Content="Font size" Grid.Row="3"/>
-        <Label x:Name="TimeLabel" Content="Time to display clipboard (ms)" Grid.Row="4"/>
-        <TextBox Grid.Column="1" Text="{Binding MaxSize, Mode=TwoWay}"/>
-        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding RectangleWidth, Mode=TwoWay}"/>
-        <ComboBox Height="30" Width="120" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding FontNames}" SelectedItem="{Binding Font, Mode=TwoWay}"/>
-        <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding FontSize, Mode=TwoWay}"/>
-        <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding TimeToElapse, Mode=TwoWay}"/>
-    </Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Content="Maximum size"/>
+                <TextBox Grid.Column="1" Text="{Binding MaxSize, Mode=TwoWay}"/>
+
+                <Label Content="Time to display clipboard (ms)" Grid.Row="1"/>
+                <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding TimeToElapse, Mode=TwoWay}"/>
+
+                <Label Content="Run on startup" Grid.Row="2"></Label>
+                <CheckBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                          IsChecked="{Binding IsAutostart, Mode=TwoWay}">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"></ScaleTransform>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+
+                <Label Grid.Row="3">Activation shortcut</Label>
+                <CheckBox Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                          IsChecked="{Binding IsShortcutActivated, Mode=TwoWay}">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2"></ScaleTransform>
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+                
+                <Label Grid.Row="4">Shortcut combination</Label>
+                <TextBox x:Name="CombinationTextBox" TextAlignment="Center" Width="135" Grid.Row="4" Grid.Column="1"
+                         IsReadOnly="True" IsEnabled="{Binding IsChangingCombination, Mode=TwoWay}"
+                         TextChanged="OnCombinationChanged" Text="{Binding Combination, Mode=TwoWay}"></TextBox>
+
+                <Button Grid.Row="5" Grid.Column="1" Width="180" Height="30" Click="OnClickChangeCombinationButton"
+                        IsEnabled="{Binding IsShortcutActivated, Mode=TwoWay}">Click to change combination</Button>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Appearance">
+            <Grid DataContext="{Binding SettingsModel.AppearanceSettingsModel}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Label Content="Rectangle width"/>
+                <TextBox Grid.Column="1" Text="{Binding RectangleSize, Mode=TwoWay}"/>
+
+                <Label Content="Font" Grid.Row="1"/>
+                <ComboBox Height="30" Width="120" Grid.Column="1" Grid.Row="1" ItemsSource="{Binding FontNames}" 
+                          SelectedItem="{Binding Font, Mode=TwoWay}"/>
+
+                <Label Content="Font size" Grid.Row="2"/>
+                <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding FontSize, Mode=TwoWay}"/>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

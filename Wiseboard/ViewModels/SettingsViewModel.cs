@@ -1,6 +1,4 @@
 ﻿using Wiseboard.Handlers;
-using System;
-using System.Windows.Input;
 using Wiseboard.Models;
 
 namespace Wiseboard.ViewModels

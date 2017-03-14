@@ -11,7 +11,7 @@
     <Grid>
         <Image x:Name="Logo" HorizontalAlignment="Left" Height="85" Margin="10,10,0,0" VerticalAlignment="Top" Width="85"/>
         <Label Content="Wiseboard" HorizontalAlignment="Left" Margin="100,10,0,0" VerticalAlignment="Top" Width="182" Height="56" HorizontalContentAlignment="Center" FontFamily="Lao UI" FontSize="30" FontWeight="Bold"/>
-        <Label Content="Version 0.1.2.1" HorizontalAlignment="Left" Margin="100,66,0,0" VerticalAlignment="Top" Width="182" Height="29" HorizontalContentAlignment="Center" FontSize="18" FontStyle="Italic"/>
+        <Label Content="Version 0.1.3" HorizontalAlignment="Left" Margin="100,66,0,0" VerticalAlignment="Top" Width="182" Height="29" HorizontalContentAlignment="Center" FontSize="18" FontStyle="Italic"/>
         <Label Content="Created by Damian Frisch." HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" Width="272" FontSize="14" HorizontalContentAlignment="Center" Height="30"/>
         <Label Content="All rights reserved." HorizontalAlignment="Left" Margin="10,153,0,0" VerticalAlignment="Top" Width="272" FontSize="14" HorizontalContentAlignment="Center" Height="30"/>
     </Grid>
