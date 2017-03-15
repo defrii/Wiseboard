@@ -12,9 +12,9 @@ namespace Wiseboard.Models
 
     public class ClipboardData : IClipboardData
     {
-        readonly object _data;
-        readonly string _fileNames;
-        readonly bool _isLink;
+        private readonly object _data;
+        private readonly string _fileNames;
+        private readonly bool _isLink;
 
         public ClipboardData(object data, bool isLinkParam, string fileNames = null)
         {

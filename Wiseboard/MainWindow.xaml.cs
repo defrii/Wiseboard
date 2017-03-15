@@ -13,8 +13,8 @@ namespace Wiseboard
     /// </summary>
     public partial class MainWindow : Window, IChangedStatusObserver
     {
-        PastingHandler _pastingHandler;
-        readonly System.Windows.Forms.NotifyIcon _notifyIcon;
+        private readonly PastingHandler _pastingHandler;
+        private readonly System.Windows.Forms.NotifyIcon _notifyIcon;
 
         public MainWindow()
         {
@@ -35,25 +35,22 @@ namespace Wiseboard
             };
 
             _notifyIcon.Click += (sender, e) => DisplayFromMinimized();
-        }
 
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
+            WindowInteropHelper wndInterop = new WindowInteropHelper(this);
+            wndInterop.EnsureHandle();
 
-            PresentationSource source = PresentationSource.FromVisual(this);
-
-            IntPtr wndHandler = new WindowInteropHelper(this).Handle;
-            _pastingHandler = new PastingHandler(source, wndHandler);
+            _pastingHandler = new PastingHandler(wndInterop.Handle);
             _pastingHandler.AddObserver(this);
 
-            HwndSource sourceHandler = (HwndSource) source;
+            HwndSource sourceHandler = HwndSource.FromHwnd(wndInterop.Handle);
             sourceHandler?.AddHook(_pastingHandler.CaptureKeyCombinations);
 
             VerifyRunButtonContent();
+
+            Visibility = Visibility.Hidden;
         }
 
-        void DisplayFromMinimized()
+        private void DisplayFromMinimized()
         {
             Visibility = Visibility.Visible;
             WindowState = WindowState.Normal;

@@ -13,9 +13,9 @@ namespace Wiseboard.Views
     /// </summary>
     public partial class ClipboardView : Window
     {
-        readonly LinearGradientBrush _brush;
-        readonly AppearanceSettingsModel _settings;
-        readonly LinkedList<IClipboardData> _extendedClipboard;
+        private readonly LinearGradientBrush _brush;
+        private readonly AppearanceSettingsModel _settings;
+        private readonly LinkedList<IClipboardData> _extendedClipboard;
 
         public ClipboardView(AppearanceSettingsModel settings, LinkedList<IClipboardData> extendedClipboard)
         {
@@ -80,7 +80,7 @@ namespace Wiseboard.Views
                 element.Background = _brush;
         }
 
-        void CenterWindow()
+        private void CenterWindow()
         {
             int count = clipboardStack.Children.OfType<TextBlock>().Count();
             if (count > 0)

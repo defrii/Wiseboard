@@ -2,9 +2,9 @@
 {
     public class ClipboardEventsHandler
     {
-        bool _keyNextHandled;
-        bool _isEarlyPasted;
-        bool _isSelectingItem;
+        private bool _keyNextHandled;
+        private bool _isEarlyPasted;
+        private bool _isSelectingItem;
 
         public bool CanChangePositionOfSelectedItem() => _keyNextHandled;
         public void SetChangePositionOfSelectedItem(bool value) => _keyNextHandled = value;

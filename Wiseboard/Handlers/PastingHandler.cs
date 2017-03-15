@@ -16,7 +16,7 @@ using Wiseboard.Views;
 
 namespace Wiseboard.Handlers
 {
-    class PastingHandler
+    internal class PastingHandler
     {
         public delegate int KeyboardHookProc(int code, int wParam, ref KeyboardHookStruct lParam);
         public struct KeyboardHookStruct
@@ -28,41 +28,36 @@ namespace Wiseboard.Handlers
             public int DwExtraInfo;
         }
 
-        enum HotKeyId { Paste };
+        private enum HotKeyId { Paste }
 
-        Key _shortcutKey;
-        int _shortcutModifier;
-
-        const int WH_KEYBOARD_LL = 13;
-        const int WM_HOTKEY = 0x0312;
-        const int WM_CLIPBOARDUPDATE = 0x031D;
-        const int CONTROL = 0x0002;
-        const int VK_V = 0x56;
+        private const int WH_KEYBOARD_LL = 13;
+        private const int WM_HOTKEY = 0x0312;
+        private const int WM_CLIPBOARDUPDATE = 0x031D;
+        private const int CONTROL = 0x0002;
+        private const int VK_V = 0x56;
 
         public ClipboardView ClipboardDisplayer { get; set; }
         public LinkedList<IClipboardData> ExtendedClipboard { get; set; } = new LinkedList<IClipboardData>();
         private readonly List<IChangedStatusObserver> _changedStatusObservers = new List<IChangedStatusObserver>();
 
         public static SettingsModel Settings { get; set; } = new SettingsModel();
-        readonly ClipboardEventsHandler _clipboardEventsHandler = new ClipboardEventsHandler();
+        private readonly ClipboardEventsHandler _clipboardEventsHandler = new ClipboardEventsHandler();
 
         public bool Running { get; set; } = true;
-        int _clipboardIndex;
+        private int _clipboardIndex;
 
-        readonly InputSimulator _inputSimulator = new InputSimulator();
-        readonly List<Key> _hookedKeys = new List<Key>();
-        readonly Stopwatch _timer = new Stopwatch();
+        private readonly InputSimulator _inputSimulator = new InputSimulator();
+        private readonly List<Key> _hookedKeys = new List<Key>();
+        private readonly Stopwatch _timer = new Stopwatch();
 
-        IntPtr _hHook = IntPtr.Zero;
+        private IntPtr _hHook = IntPtr.Zero;
 
         private static KeyboardHookProc _callbackDelegate;
-        readonly PresentationSource _source;
 
-        readonly IntPtr _wndHandler;
+        private readonly IntPtr _wndHandler;
 
-        public PastingHandler(PresentationSource source, IntPtr wndHandler)
+        public PastingHandler(IntPtr wndHandler)
         {
-            _source = source;
             _wndHandler = wndHandler;
             ClipboardDisplayer = new ClipboardView(Settings.AppearanceSettingsModel, ExtendedClipboard);
 
@@ -91,16 +86,15 @@ namespace Wiseboard.Handlers
                     if (HandleEarlyPastedKeyPressed(key, wParam))
                         return 1;
                 }
-                KeyEventArgs kea = new KeyEventArgs(Keyboard.PrimaryDevice, _source, 0, key);
                 if (TypeOfPressChecker.IsKeyDownPressed(wParam))
-                    KeyDownKeyHandle(kea);
+                    KeyDownKeyHandle(key);
                 else if (TypeOfPressChecker.IsKeyUpPressed(wParam))
-                    KeyUpKeyHandle(kea);
+                    KeyUpKeyHandle(key);
             }
             return CallNextHookEx(_hHook, code, wParam, ref lParam);
         }
 
-        bool HandleEarlyPastedKeyPressed(Key key, int typeOfPress)
+        private bool HandleEarlyPastedKeyPressed(Key key, int typeOfPress)
         {
             if (key == Key.V && TypeOfPressChecker.IsKeyDownPressed(typeOfPress) && !IsPastingStarted())
             {
@@ -201,9 +195,8 @@ namespace Wiseboard.Handlers
             _clipboardIndex = 0;
         }
 
-        void KeyUpKeyHandle(KeyEventArgs e)
+        private void KeyUpKeyHandle(Key key)
         {
-            Key key = e.Key;
             switch (key)
             {
                 case Key.V:
@@ -230,10 +223,8 @@ namespace Wiseboard.Handlers
             }
         }
 
-        void KeyDownKeyHandle(KeyEventArgs e)
+        private void KeyDownKeyHandle(Key key)
         {
-            Key key = e.Key;
-
             switch (key)
             {
                 case Key.V:
@@ -249,7 +240,7 @@ namespace Wiseboard.Handlers
                     break;
             }
 
-            if (e.Key == Settings.GeneralSettingsModel.ShortcutKey
+            if (key == Settings.GeneralSettingsModel.ShortcutKey
                 && Keyboard.Modifiers == (ModifierKeys) Settings.GeneralSettingsModel.ShortcutModifiers)
             {
                 bool status = SwitchMode();
@@ -300,7 +291,7 @@ namespace Wiseboard.Handlers
             ClipboardDisplayer.Close();
         }
 
-        async void WaitForDisplayExtendedClipboard()
+        private async void WaitForDisplayExtendedClipboard()
         {
             await Task.Run(() =>
             {
@@ -354,13 +345,13 @@ namespace Wiseboard.Handlers
         }
 
         [DllImport("user32.dll")]
-        static extern IntPtr SetWindowsHookEx(int idHook, KeyboardHookProc callback, IntPtr hInstance, uint threadId);
+        private static extern IntPtr SetWindowsHookEx(int idHook, KeyboardHookProc callback, IntPtr hInstance, uint threadId);
         [DllImport("user32.dll")]
-        static extern bool UnhookWindowsHookEx(IntPtr hInstance);
+        private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
         [DllImport("user32.dll")]
-        static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref KeyboardHookStruct lParam);
+        private static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref KeyboardHookStruct lParam);
         [DllImport("kernel32.dll")]
-        static extern IntPtr LoadLibrary(string lpFileName);
+        private static extern IntPtr LoadLibrary(string lpFileName);
         [DllImport("user32.dll")]
         public static extern bool AddClipboardFormatListener(IntPtr hwnd);
         [DllImport("user32.dll")]

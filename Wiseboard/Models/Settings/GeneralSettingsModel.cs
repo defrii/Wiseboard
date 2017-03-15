@@ -9,7 +9,7 @@ namespace Wiseboard.Models.Settings
 {
     public class GeneralSettingsModel : INotifyPropertyChanged
     {
-        int _maxSize = 5;
+        private int _maxSize = 5;
         public int MaxSize
         {
             get { return _maxSize; }
@@ -20,7 +20,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        int _timeToElapse = 600;
+        private int _timeToElapse = 600;
         public int TimeToElapse
         {
             get { return _timeToElapse; }
@@ -31,7 +31,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        bool _isAutostart = false;
+        private bool _isAutostart = false;
         public bool IsAutostart
         {
             get { return _isAutostart; }
@@ -49,7 +49,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        bool _isShortcutActivated = false;
+        private bool _isShortcutActivated = false;
         public bool IsShortcutActivated
         {
             get { return _isShortcutActivated; }
@@ -60,7 +60,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        bool _isChangingCombination = false;
+        private bool _isChangingCombination = false;
         public bool IsChangingCombination
         {
             get { return _isChangingCombination; }
@@ -71,7 +71,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        string _combination;
+        private string _combination;
         public string Combination
         {
             get { return _combination; }
@@ -93,7 +93,7 @@ namespace Wiseboard.Models.Settings
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        void RegisterOnStartUp()
+        private void RegisterOnStartUp()
         {
             using (RegistryKey key = Registry.CurrentUser
                 .OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
@@ -102,7 +102,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        void UnregisterOnStartUp()
+        private void UnregisterOnStartUp()
         {
             using (RegistryKey key = Registry.CurrentUser
                 .OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))

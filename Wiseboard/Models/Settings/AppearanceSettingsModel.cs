@@ -8,7 +8,7 @@ namespace Wiseboard.Models.Settings
 {
     public class AppearanceSettingsModel : INotifyPropertyChanged
     {
-        int _rectangleSize = 200;
+        private int _rectangleSize = 200;
         public int RectangleSize
         {
             get { return _rectangleSize; }
@@ -19,7 +19,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        FontFamily _font = new FontFamily("Arial");
+        private FontFamily _font = new FontFamily("Arial");
         public FontFamily Font
         {
             get { return _font; }
@@ -30,7 +30,7 @@ namespace Wiseboard.Models.Settings
             }
         }
 
-        int _fontSize = 12;
+        private int _fontSize = 12;
         public int FontSize
         {
             get { return _fontSize; }

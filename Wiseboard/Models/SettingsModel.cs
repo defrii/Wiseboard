@@ -13,7 +13,7 @@ namespace Wiseboard.Models
         public GeneralSettingsModel GeneralSettingsModel { get; set; } = new GeneralSettingsModel();
         public AppearanceSettingsModel AppearanceSettingsModel { get; set; } = new AppearanceSettingsModel();
 
-        XElement _config;
+        private XElement _config;
 
         public SettingsModel()
         {
@@ -29,13 +29,13 @@ namespace Wiseboard.Models
             }
         }
 
-        void ReadFromXml()
+        private void ReadFromXml()
         {
             ReadGeneralSettings();
             ReadAppearanceSettings();
         }
 
-        void ReadGeneralSettings()
+        private void ReadGeneralSettings()
         {
             XElement general = _config.Element("general");
             GeneralSettingsModel.MaxSize = int.Parse(general.Element("max_size").Value);
@@ -49,7 +49,7 @@ namespace Wiseboard.Models
             GeneralSettingsModel.Combination = ConvertCombinationToString();
         }
 
-        void ReadAppearanceSettings()
+        private void ReadAppearanceSettings()
         {
             XElement appearance = _config.Element("appearance");
             AppearanceSettingsModel.RectangleSize = int.Parse(appearance.Element("rectangle_size").Value);
@@ -62,7 +62,7 @@ namespace Wiseboard.Models
             SaveConfigToFile();
         }
 
-        void SaveConfigToFile()
+        private void SaveConfigToFile()
         {
             _config = new XElement("configuration",
             new XElement("general",
@@ -82,7 +82,7 @@ namespace Wiseboard.Models
             _config.Save(AppDomain.CurrentDomain.BaseDirectory + "\\config.xml");
         }
 
-        string ConvertCombinationToString()
+        private string ConvertCombinationToString()
         {
             string combination = "";
             int modifiers = GeneralSettingsModel.ShortcutModifiers;
