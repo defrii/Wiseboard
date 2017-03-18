@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -50,6 +51,8 @@ namespace Wiseboard
 
             VerifyRunButtonContent();
 
+            Closing += OnWindowClosing;
+
             Visibility = Visibility.Hidden;
         }
 
@@ -66,6 +69,15 @@ namespace Wiseboard
             _pastingHandler.CloseClipboardView();
             _pastingHandler.UnregisterAll();
             _notifyIcon.Visible = false;
+        }
+
+        private void OnWindowClosing(object sender, CancelEventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to quit?", "To be or not to be?", MessageBoxButton.YesNo) ==
+                MessageBoxResult.No)
+            {
+                e.Cancel = true;
+            }
         }
 
         private void RunButton_Click(object sender, RoutedEventArgs e)

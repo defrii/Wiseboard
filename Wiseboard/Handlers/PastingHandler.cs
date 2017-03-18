@@ -275,7 +275,9 @@ namespace Wiseboard.Handlers
         {
             if (Clipboard.ContainsText())
             {
-                ExtendedClipboard.AddFirst(new ClipboardData(Clipboard.GetText(), false));
+                ClipboardData newElement = new ClipboardData(Clipboard.GetText(), false);
+                RemoveDuplicates(newElement);
+                ExtendedClipboard.AddFirst(newElement);
             }
 
             else if (Clipboard.ContainsFileDropList())
@@ -284,7 +286,9 @@ namespace Wiseboard.Handlers
                 foreach (var fileName in Clipboard.GetFileDropList())
                     fileNames += fileName + '\n';
 
-                ExtendedClipboard.AddFirst(new ClipboardData(Clipboard.GetDataObject(), true, fileNames));
+                ClipboardData newElement = new ClipboardData(Clipboard.GetDataObject(), true, fileNames);
+                RemoveDuplicates(newElement);
+                ExtendedClipboard.AddFirst(newElement);
             }
 
             while (ExtendedClipboard.Count > _generalSettingsModel.MaxSize)
@@ -347,6 +351,18 @@ namespace Wiseboard.Handlers
         public bool IsPastingStarted()
         {
             return _timer.IsRunning;
+        }
+
+        private void RemoveDuplicates(IClipboardData capturedData)
+        {
+            foreach (var element in ExtendedClipboard)
+            {
+                if (element.GetVisibleText() == capturedData.GetVisibleText())
+                {
+                    ExtendedClipboard.Remove(element);
+                    break;
+                }
+            }
         }
 
         [DllImport("user32.dll")]
