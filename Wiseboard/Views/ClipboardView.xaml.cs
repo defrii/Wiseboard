@@ -3,8 +3,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.Practices.ServiceLocation;
+using Wiseboard.Data;
 using Wiseboard.Models;
-using Wiseboard.Models.Settings;
+using Wiseboard.ViewModels;
 
 namespace Wiseboard.Views
 {
@@ -14,14 +16,15 @@ namespace Wiseboard.Views
     public partial class ClipboardView : Window
     {
         private readonly LinearGradientBrush _brush;
-        private readonly AppearanceSettingsModel _settings;
+
+        private readonly AppearanceSettingsModel _settings =
+            ServiceLocator.Current.GetInstance<AppearanceSettingsViewModel>().AppearanceSettingsModel;
         private readonly LinkedList<IClipboardData> _extendedClipboard;
 
-        public ClipboardView(AppearanceSettingsModel settings, LinkedList<IClipboardData> extendedClipboard)
+        public ClipboardView(LinkedList<IClipboardData> extendedClipboard)
         {
             InitializeComponent();
 
-            _settings = settings;
             _extendedClipboard = extendedClipboard;
 
             _brush = new LinearGradientBrush(Color.FromRgb(80, 80, 80), Color.FromRgb(120, 120, 120), 0) {Opacity = 0.8};

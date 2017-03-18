@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Wiseboard.Models
+namespace Wiseboard.Data
 {
     public interface IClipboardData
     {

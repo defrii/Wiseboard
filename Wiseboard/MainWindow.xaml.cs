@@ -4,6 +4,7 @@ using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using Wiseboard.Handlers;
 using Wiseboard.Observers;
+using Wiseboard.ViewModels;
 using Wiseboard.Views;
 
 namespace Wiseboard
@@ -19,6 +20,8 @@ namespace Wiseboard
         public MainWindow()
         {
             InitializeComponent();
+
+            ViewModelLocator.Configure();
 
             Icon = Imaging.CreateBitmapSourceFromHIcon(Properties.Resources.Icon.Handle, Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions());

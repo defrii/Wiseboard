@@ -3,9 +3,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.Win32;
-using Wiseboard.Annotations;
+using Wiseboard.Properties;
 
-namespace Wiseboard.Models.Settings
+namespace Wiseboard.Models
 {
     public class GeneralSettingsModel : INotifyPropertyChanged
     {

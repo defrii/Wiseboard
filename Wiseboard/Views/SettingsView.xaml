@@ -28,7 +28,7 @@
     </Window.Resources>
     <TabControl>
         <TabItem Header="General">
-            <Grid DataContext="{Binding SettingsModel.GeneralSettingsModel}">
+            <Grid DataContext="{Binding Source={StaticResource Locator}, Path=GeneralSettings.GeneralSettingsModel}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
@@ -74,7 +74,7 @@
             </Grid>
         </TabItem>
         <TabItem Header="Appearance">
-            <Grid DataContext="{Binding SettingsModel.AppearanceSettingsModel}">
+            <Grid DataContext="{Binding Source={StaticResource Locator}, Path=AppearanceSettings.AppearanceSettingsModel}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>

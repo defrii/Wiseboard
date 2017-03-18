@@ -2,6 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Practices.ServiceLocation;
+using Wiseboard.Handlers;
+using Wiseboard.Models;
 using Wiseboard.ViewModels;
 
 namespace Wiseboard.Views
@@ -11,12 +14,13 @@ namespace Wiseboard.Views
     /// </summary>
     public partial class SettingsView : Window
     {
-        public SettingsViewModel ViewModel { get; set; } = new SettingsViewModel();
+        readonly SettingsHandler _settingsHandler = new SettingsHandler();
 
+        private readonly GeneralSettingsModel _generalSettingsModel =
+            ServiceLocator.Current.GetInstance<GeneralSettingsViewModel>().GeneralSettingsModel;
         public SettingsView()
         {
             InitializeComponent();
-            DataContext = ViewModel;
         }
 
         public new void Show()
@@ -30,31 +34,31 @@ namespace Wiseboard.Views
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            ViewModel.SettingsModel.UpdateConfiguration();
+            _settingsHandler.UpdateConfiguration();
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-            if (!ViewModel.SettingsModel.GeneralSettingsModel.IsChangingCombination) return;
+            if (!_generalSettingsModel.IsChangingCombination) return;
 
             string combination = string.Join("+", Keyboard.Modifiers.ToString().Split(',')).Replace(" ", "");
             if ((int) e.Key < 44 || (int) e.Key > 69 || combination == "None") return;
 
             combination = combination + "+" + e.Key;
             CombinationTextBox.Text = combination;
-            ViewModel.SettingsModel.GeneralSettingsModel.ShortcutKey = e.Key;
-            ViewModel.SettingsModel.GeneralSettingsModel.ShortcutModifiers = (int)Keyboard.Modifiers;
+            _generalSettingsModel.ShortcutKey = e.Key;
+            _generalSettingsModel.ShortcutModifiers = (int)Keyboard.Modifiers;
         }
 
         private void OnClickChangeCombinationButton(object sender, RoutedEventArgs e)
         {
-            ViewModel.SettingsModel.GeneralSettingsModel.IsChangingCombination = true;
+            _generalSettingsModel.IsChangingCombination = true;
         }
 
         private void OnCombinationChanged(object sender, TextChangedEventArgs e)
         {
-            ViewModel.SettingsModel.GeneralSettingsModel.IsChangingCombination = false;
+            _generalSettingsModel.IsChangingCombination = false;
         }
     }
 }

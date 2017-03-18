@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
-using Wiseboard.Annotations;
+using Wiseboard.Properties;
 
-namespace Wiseboard.Models.Settings
+namespace Wiseboard.Models
 {
     public class AppearanceSettingsModel : INotifyPropertyChanged
     {

@@ -9,9 +9,12 @@ using System.Windows;
 using System.Windows.Input;
 using WindowsInput;
 using WindowsInput.Native;
+using Microsoft.Practices.ServiceLocation;
+using Wiseboard.Data;
 using Wiseboard.Handlers.Helpers;
 using Wiseboard.Models;
 using Wiseboard.Observers;
+using Wiseboard.ViewModels;
 using Wiseboard.Views;
 
 namespace Wiseboard.Handlers
@@ -40,7 +43,9 @@ namespace Wiseboard.Handlers
         public LinkedList<IClipboardData> ExtendedClipboard { get; set; } = new LinkedList<IClipboardData>();
         private readonly List<IChangedStatusObserver> _changedStatusObservers = new List<IChangedStatusObserver>();
 
-        public static SettingsModel Settings { get; set; } = new SettingsModel();
+        private readonly GeneralSettingsModel _generalSettingsModel =
+            ServiceLocator.Current.GetInstance<GeneralSettingsViewModel>().GeneralSettingsModel;
+
         private readonly ClipboardEventsHandler _clipboardEventsHandler = new ClipboardEventsHandler();
 
         public bool Running { get; set; } = true;
@@ -59,7 +64,7 @@ namespace Wiseboard.Handlers
         public PastingHandler(IntPtr wndHandler)
         {
             _wndHandler = wndHandler;
-            ClipboardDisplayer = new ClipboardView(Settings.AppearanceSettingsModel, ExtendedClipboard);
+            ClipboardDisplayer = new ClipboardView(ExtendedClipboard);
 
             if (Running)
             {
@@ -141,7 +146,7 @@ namespace Wiseboard.Handlers
         public void SetNextElement()
         {
             if (ExtendedClipboard.Count > 0 && !_clipboardEventsHandler.CanChangePositionOfSelectedItem()
-                && _timer.ElapsedMilliseconds >= Settings.GeneralSettingsModel.TimeToElapse)
+                && _timer.ElapsedMilliseconds >= _generalSettingsModel.TimeToElapse)
             {
                 if (++_clipboardIndex >= ExtendedClipboard.Count)
                     _clipboardIndex = 0;
@@ -200,7 +205,7 @@ namespace Wiseboard.Handlers
             switch (key)
             {
                 case Key.V:
-                    if (_timer.ElapsedMilliseconds < Settings.GeneralSettingsModel.TimeToElapse && IsPastingStarted())
+                    if (_timer.ElapsedMilliseconds < _generalSettingsModel.TimeToElapse && IsPastingStarted())
                     {
                         _clipboardEventsHandler.SetPastedBeforeDisplayClipboard(true);
                         _clipboardEventsHandler.SetSelectingFromClipboard(false);
@@ -240,8 +245,8 @@ namespace Wiseboard.Handlers
                     break;
             }
 
-            if (key == Settings.GeneralSettingsModel.ShortcutKey
-                && Keyboard.Modifiers == (ModifierKeys) Settings.GeneralSettingsModel.ShortcutModifiers)
+            if (key == _generalSettingsModel.ShortcutKey
+                && Keyboard.Modifiers == (ModifierKeys) _generalSettingsModel.ShortcutModifiers)
             {
                 bool status = SwitchMode();
                 foreach (var observer in _changedStatusObservers)
@@ -282,7 +287,7 @@ namespace Wiseboard.Handlers
                 ExtendedClipboard.AddFirst(new ClipboardData(Clipboard.GetDataObject(), true, fileNames));
             }
 
-            while (ExtendedClipboard.Count > Settings.GeneralSettingsModel.MaxSize)
+            while (ExtendedClipboard.Count > _generalSettingsModel.MaxSize)
                 ExtendedClipboard.RemoveLast();
         }
 
@@ -297,7 +302,7 @@ namespace Wiseboard.Handlers
             {
                 lock (_timer)
                 {
-                    while (_timer.ElapsedMilliseconds < Settings.GeneralSettingsModel.TimeToElapse) ;
+                    while (_timer.ElapsedMilliseconds < _generalSettingsModel.TimeToElapse) ;
                 }
             });
 
