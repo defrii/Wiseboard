@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Weavers>
-	<Costura/>
+	<Costura>
+    <IncludeAssemblies>
+      WindowsInput
+      GalaSoft.MvvmLight
+      GalaSoft.MvvmLight.Extras
+      GalaSoft.MvvmLight.Platform
+      Microsoft.Practices.ServiceLocation
+    </IncludeAssemblies>
+  </Costura>
   
 </Weavers>

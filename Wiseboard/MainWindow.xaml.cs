@@ -109,7 +109,17 @@ namespace Wiseboard
 
         public void UpdateStatus(bool status)
         {
-            RunButton.Content = status ? "Running..." : "Click to run";
+            if (status)
+            {
+                RunButton.Content = "Running...";
+                _notifyIcon.BalloonTipText = @"Wiseboard is running...";
+            }
+            else
+            {
+                RunButton.Content = "Click to run";
+                _notifyIcon.BalloonTipText = @"Wiseboard is disabled";
+            }
+            _notifyIcon.ShowBalloonTip(5000);
         }
     }
 }
