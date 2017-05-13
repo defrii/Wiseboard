@@ -12,3 +12,5 @@ The most intuitive Windows® clipboard extension
   * Release and push 'V' button to select data
   * To paste release 'CTRL' button
 
+# Disclaimer
+Wiseboard captures data from system clipboard, so it doesn't work with programs that use own build-in clipboard.
