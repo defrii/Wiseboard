@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Practices.ServiceLocation;
+using Microsoft.Win32;
 using Wiseboard.Data;
 using Wiseboard.Models;
 using Wiseboard.ViewModels;
@@ -88,11 +90,15 @@ namespace Wiseboard.Views
             int count = clipboardStack.Children.OfType<TextBlock>().Count();
             if (count > 0)
             {
+                double scale;
+                try { scale = PresentationSource.FromVisual(this).CompositionTarget.TransformToDevice.M11; }
+                catch (NullReferenceException) { scale = 1.0; }
+
                 var screen = System.Windows.Forms.Screen.FromPoint(System.Windows.Forms.Cursor.Position);
-                Left = screen.WorkingArea.Left + screen.WorkingArea.Width/2 - 
-                    (clipboardStack.Children.OfType<TextBlock>().First().Width * count) / 2;
-                Top = screen.WorkingArea.Top + screen.WorkingArea.Height/2 - 
-                    clipboardStack.Children.OfType<TextBlock>().First().Height / 2;
+                Left = (screen.WorkingArea.Left + screen.WorkingArea.Width / 2) / (1 * scale) -
+                       (clipboardStack.Children.OfType<TextBlock>().First().Width * count) / 2;
+                Top = (screen.WorkingArea.Top + screen.WorkingArea.Height / 2) / (1 * scale) -
+                      clipboardStack.Children.OfType<TextBlock>().First().Height / 2;
             }
         }
         
